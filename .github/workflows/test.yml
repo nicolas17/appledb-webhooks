@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 Nicolás Alvarez <nicolas.alvarez@gmail.com>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Run tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        run: python3 -m unittest
