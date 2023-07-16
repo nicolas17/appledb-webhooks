@@ -6,7 +6,7 @@ import configparser
 import hmac, hashlib
 
 from werkzeug.wrappers import Request, Response
-from werkzeug.exceptions import NotFound, MethodNotAllowed, Forbidden
+from werkzeug.exceptions import NotFound, MethodNotAllowed, Forbidden, HTTPException
 
 def parse_config(filename):
     parser = configparser.ConfigParser()
@@ -25,7 +25,10 @@ class App:
         if request.path != self.config["github-filter"]["uri"]: return NotFound()
         if request.method != 'POST': return MethodNotAllowed()
 
-        return self.handle_webhook_request(request)
+        try:
+            return self.handle_webhook_request(request)
+        except HTTPException as e:
+            return e
 
     def do_sig_check(self, request):
         header_sig = request.headers.get("x-hub-signature-256", "missing")
@@ -35,7 +38,7 @@ class App:
 
     def handle_webhook_request(self, request):
         if not self.do_sig_check(request):
-            return Forbidden()
+            raise Forbidden()
 
         return Response("data: " + repr(request.data))
 
