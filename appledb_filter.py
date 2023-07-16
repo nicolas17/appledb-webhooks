@@ -40,6 +40,8 @@ class App:
         if not self.do_sig_check(request):
             raise Forbidden()
 
+        json = request.json
+
         return Response("data: " + repr(request.data))
 
     def __call__(self, environ, start_response):

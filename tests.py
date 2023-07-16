@@ -31,6 +31,7 @@ class TestApp(unittest.TestCase):
             "/webhook",
             data=data,
             headers={
+                "content-type": "application/json",
                 "x-hub-signature":      f"sha1={sig_sha1.hexdigest()}",
                 "x-hub-signature-256":  f"sha256={sig_sha256.hexdigest()}"
             }
@@ -45,6 +46,11 @@ class TestApp(unittest.TestCase):
         data = '{"payload": 42}'.encode('utf8')
         response = self.do_signed_post(data)
         self.assertEqual(response.status_code, 200)
+
+    def test_bad_json(self):
+        data = b'invalid'
+        response = self.do_signed_post(data)
+        self.assertEqual(response.status_code, 400)
 
 if __name__ == '__main__':
     unittest.main()
