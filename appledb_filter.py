@@ -53,6 +53,15 @@ class App:
 
         json = request.json
 
+        if "x-github-delivery" in request.headers:
+            delivery_id = request.headers["x-github-delivery"]
+            if all(x in '0123456789abcdef-' for x in delivery_id):
+                with open(f"logs/{delivery_id}.json", "wb") as f:
+                    f.write(request.data)
+                with open(f"logs/{delivery_id}.req", "w") as f:
+                    for k,v in request.headers.items():
+                        f.write(f"{k}: {v}\n")
+
         FORWARDED_HEADERS = [
             "Accept",
             "X-GitHub-Delivery",
