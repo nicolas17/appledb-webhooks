@@ -19,6 +19,6 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --user pipenv
-          pipenv install --deploy
+          pipenv install --deploy --dev
       - name: Run tests
         run: pipenv run python3 -m unittest

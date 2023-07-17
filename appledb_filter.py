@@ -4,9 +4,19 @@
 
 import configparser
 import hmac, hashlib
+import traceback
 
 from werkzeug.wrappers import Request, Response
-from werkzeug.exceptions import NotFound, MethodNotAllowed, Forbidden, HTTPException
+from werkzeug.exceptions import (
+    NotFound,
+    MethodNotAllowed,
+    Forbidden,
+    GatewayTimeout,
+    BadGateway,
+    HTTPException
+)
+
+import requests
 
 def parse_config(filename):
     parser = configparser.ConfigParser()
@@ -20,6 +30,7 @@ class App:
         else:
             self.config.read_dict(config)
         self.token = self.config["github-filter"]["token"].encode('utf8')
+        self.target_uri = self.config["github-filter"]["target-uri"]
 
     def dispatch_request(self, request):
         if request.path != self.config["github-filter"]["uri"]: return NotFound()
@@ -41,6 +52,29 @@ class App:
             raise Forbidden()
 
         json = request.json
+
+        FORWARDED_HEADERS = [
+            "Accept",
+            "X-GitHub-Delivery",
+            "X-GitHub-Event",
+            "X-GitHub-Hook-ID",
+            "X-GitHub-Hook-Installation-Target-ID",
+            "X-GitHub-Hook-Installation-Target-Type",
+            "X-Hub-Signature",
+            "X-Hub-Signature-256",
+            "Content-Type"
+        ]
+        headers = {}
+        for header_name in FORWARDED_HEADERS:
+            if header_name in request.headers:
+                headers[header_name] = request.headers[header_name]
+
+        try:
+            resp = requests.post(self.target_uri, headers=headers, data=request.data)
+        except requests.exceptions.ConnectTimeout as e:
+            raise GatewayTimeout()
+        except requests.exceptions.ConnectionError as e:
+            raise BadGateway()
 
         return Response("data: " + repr(request.data))
 

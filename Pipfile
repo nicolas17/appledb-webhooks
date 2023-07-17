@@ -9,6 +9,10 @@ name = "pypi"
 
 [packages]
 werkzeug = "~=2.3"
+requests = "~=2.31"
+
+[dev-packages]
+requests-mock = "~=1.11"
 
 [requires]
 python_version = "3.9"

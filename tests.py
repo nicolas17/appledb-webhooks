@@ -7,13 +7,17 @@ import hmac, hashlib
 import json
 from werkzeug.test import Client
 
+import requests
+import requests_mock
+
 import appledb_filter
 
 class TestApp(unittest.TestCase):
     def setUp(self):
         self.app = appledb_filter.App({"github-filter": {
             "uri": "/webhook",
-            "token": "12345678"
+            "token": "12345678",
+            "target-uri": "http://example.com/webhook"
         }})
         self.client = Client(self.app)
 
@@ -49,7 +53,9 @@ class TestApp(unittest.TestCase):
 
     def test_good_signature(self):
         data = '{"payload": 42}'.encode('utf8')
-        response = self.do_signed_post(data)
+        with requests_mock.Mocker() as m:
+            m.post("http://example.com/webhook")
+            response = self.do_signed_post(data)
         self.assertEqual(response.status_code, 200)
 
     def test_bad_json(self):
@@ -76,9 +82,15 @@ class TestApp(unittest.TestCase):
             },
             "forced": False
         }).encode('utf8')
-        response = self.do_signed_post(data, headers={
-            "X-GitHub-Event": "push"
-        })
+        with requests_mock.Mocker() as m:
+            m.post("http://example.com/webhook")
+            response = self.do_signed_post(data, headers={
+                "X-GitHub-Event": "push"
+            })
+        up_request = m.request_history[0]
+        self.assertEqual(up_request.body, data)
+        self.assertEqual(up_request.headers.get("X-GitHub-Event"), "push")
+
         self.assertEqual(response.status_code, 200)
 
 if __name__ == '__main__':
