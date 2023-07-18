@@ -10,6 +10,7 @@ name = "pypi"
 [packages]
 werkzeug = "~=2.3"
 requests = "~=2.31"
+gunicorn = "~=21.0"
 
 [dev-packages]
 requests-mock = "~=1.11"
