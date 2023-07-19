@@ -93,5 +93,31 @@ class TestApp(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_gh_pages_skip(self):
+        data = json.dumps({
+            "ref": "refs/heads/gh-pages",
+            "repository": {
+                "id": 12345678,
+                "name": "appledb",
+                "full_name": "littlebyteorg/appledb",
+            },
+            "pusher": {
+                "name": "github-actions[bot]",
+                "email": None
+            },
+            "sender": {
+                "login": "github-actions[bot]",
+                "type": "Bot"
+            },
+            "forced": True
+        }).encode('utf8')
+        with requests_mock.Mocker() as m:
+            m.post("http://example.com/webhook")
+            response = self.do_signed_post(data, headers={
+                "X-GitHub-Event": "push"
+            })
+        self.assertEqual(m.request_history, [], "expected empty request list")
+        self.assertEqual(response.status_code, 200)
+
 if __name__ == '__main__':
     unittest.main()

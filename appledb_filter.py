@@ -62,6 +62,13 @@ class App:
                     for k,v in request.headers.items():
                         f.write(f"{k}: {v}\n")
 
+        if (request.headers.get('x-github-event') == 'push' and
+            json.get('repository',{}).get('full_name') == 'littlebyteorg/appledb' and
+            json.get('sender',{}).get('login') == 'github-actions[bot]' and
+            json.get('pusher',{}).get('name') == 'github-actions[bot]' and
+            json.get('forced') == True):
+            return Response("Skipping this webhook event")
+
         FORWARDED_HEADERS = [
             "Accept",
             "X-GitHub-Delivery",
