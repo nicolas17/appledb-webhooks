@@ -64,13 +64,13 @@ class App:
                         f.write(f"{k}: {v}\n")
 
         if (request.headers.get('x-github-event') == 'push' and
-            json.get('repository',{}).get('full_name') == 'littlebyteorg/appledb' and
+            json.get('ref') == 'refs/heads/gh-pages' and
             json.get('sender',{}).get('login') == 'github-actions[bot]' and
             json.get('pusher',{}).get('name') == 'github-actions[bot]' and
             json.get('forced') == True):
             if delivery_id:
                 with open(f"logs/{delivery_id}.req", "a") as f:
-                    f.write(f"Skipping this webhook, github-actions force-push to appledb\n")
+                    f.write(f"Skipping this webhook, github-actions force-push to gh-pages branch\n")
             return Response("Skipping this webhook event")
 
         FORWARDED_HEADERS = [

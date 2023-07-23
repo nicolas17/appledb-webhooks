@@ -98,8 +98,8 @@ class TestApp(unittest.TestCase):
             "ref": "refs/heads/gh-pages",
             "repository": {
                 "id": 12345678,
-                "name": "appledb",
-                "full_name": "littlebyteorg/appledb",
+                "name": "ios.cfw.guide",
+                "full_name": "cfw-guide/ios.cfw.guide"
             },
             "pusher": {
                 "name": "github-actions[bot]",
