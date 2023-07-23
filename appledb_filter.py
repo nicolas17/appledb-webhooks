@@ -53,6 +53,7 @@ class App:
 
         json = request.json
 
+        delivery_id = None
         if "x-github-delivery" in request.headers:
             delivery_id = request.headers["x-github-delivery"]
             if all(x in '0123456789abcdef-' for x in delivery_id):
@@ -67,6 +68,9 @@ class App:
             json.get('sender',{}).get('login') == 'github-actions[bot]' and
             json.get('pusher',{}).get('name') == 'github-actions[bot]' and
             json.get('forced') == True):
+            if delivery_id:
+                with open(f"logs/{delivery_id}.req", "a") as f:
+                    f.write(f"Skipping this webhook, github-actions force-push to appledb\n")
             return Response("Skipping this webhook event")
 
         FORWARDED_HEADERS = [
