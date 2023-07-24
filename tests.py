@@ -119,5 +119,45 @@ class TestApp(unittest.TestCase):
         self.assertEqual(m.request_history, [], "expected empty request list")
         self.assertEqual(response.status_code, 200)
 
+    def test_submodule_skip(self):
+        data = json.dumps({
+            "ref": "refs/heads/main",
+            "repository": {
+                "id": 12345678,
+                "name": "ios.cfw.guide",
+                "full_name": "cfw-guide/ios.cfw.guide",
+                "organization": "cfw-guide"
+            },
+            "pusher": {
+                "name": "emiyl",
+                "email": None
+            },
+            "sender": {
+                "login": "emiyl",
+                "type": "User"
+            },
+            "forced": False,
+            "head_commit": {
+                "message": "Update AppleDB submodule",
+                "author": {
+                    "name": "GitHub Actions - update submodules",
+                    "email": "actions@github.com",
+                    "username": "actions-user"
+                },
+                "committer": {
+                    "name": "GitHub Actions - update submodules",
+                    "email": "actions@github.com",
+                    "username": "actions-user"
+                },
+            }
+        }).encode('utf8')
+        with requests_mock.Mocker() as m:
+            m.post("http://example.com/webhook")
+            response = self.do_signed_post(data, headers={
+                "X-GitHub-Event": "push"
+            })
+        self.assertEqual(m.request_history, [], "expected empty request list")
+        self.assertEqual(response.status_code, 200)
+
 if __name__ == '__main__':
     unittest.main()

@@ -73,6 +73,17 @@ class App:
                     f.write(f"Skipping this webhook, github-actions force-push to gh-pages branch\n")
             return Response("Skipping this webhook event")
 
+        if (request.headers.get('x-github-event') == 'push' and
+            json.get('repository',{}).get('organization') == 'cfw-guide' and
+            json.get('sender',{}).get('login') == 'emiyl' and
+            json.get('head_commit',{}).get('author',{}).get('username') == 'actions-user' and
+            json.get('head_commit',{}).get('committer',{}).get('username') == 'actions-user' and
+            json.get('head_commit',{}).get('message','') == 'Update AppleDB submodule'):
+            if delivery_id:
+                with open(f"logs/{delivery_id}.req", "a") as f:
+                    f.write(f"Skipping this webhook, submodule update on guide repo\n")
+            return Response("Skipping this webhook event")
+
         FORWARDED_HEADERS = [
             "Accept",
             "X-GitHub-Delivery",
